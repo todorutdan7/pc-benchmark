@@ -5,9 +5,7 @@ import time
 from config import TEST_DESCRIPTIONS, BENCHMARK_ITERATIONS
 
 def _format_detailed_results(data_dict, test_id):
-    """
-    Helper function to format JSON results into a readable string.
-    """
+
     output = ""
     if 'device_name' in data_dict:
         output += f"{'Device Name':<22}: {data_dict['device_name']}\n\n"
@@ -144,7 +142,6 @@ class ScoreChart(tk.Canvas):
     def draw_chart(self):
         self.delete("all")
         
-        # Axis Labels
         self.create_text(15, self.height // 2, text=self.y_label, angle=90, 
                          font=("Segoe UI", 8, "bold"), fill="#555")
         self.create_text(self.width // 2, self.height - 10, text="Iteration", 
@@ -168,11 +165,9 @@ class ScoreChart(tk.Canvas):
         plot_w = self.width - (self.pad_left + self.pad_right)
         plot_h = self.height - (self.pad_y + self.pad_bottom)
         
-        # Draw Grid
         self.create_line(self.pad_left, self.pad_y + 10, self.pad_left, self.height - self.pad_bottom, fill="#ddd") 
         self.create_line(self.pad_left, self.height - self.pad_bottom, self.width - self.pad_right, self.height - self.pad_bottom, fill="#ddd") 
         
-        # Min/Max Text
         if self.is_integer:
             lbl_max = f"{int(y_max)}"
             lbl_min = f"{int(y_min)}"
@@ -185,18 +180,14 @@ class ScoreChart(tk.Canvas):
         self.create_text(self.pad_left - 5, self.height - self.pad_bottom, 
                         text=lbl_min, anchor="e", fill="#555", font=("Segoe UI", 7))
 
-        # --- DRAW BARS ---
         count = len(self.scores)
         if count == 0: return
 
-        # Width available for each iteration slot
         iter_width = plot_w / count
-        # Actual bar width (60% of the slot, leaving 20% padding on each side)
         bar_width = iter_width * 0.6
         spacing = (iter_width - bar_width) / 2
 
         for i, score in enumerate(self.scores):
-            # Calculate height relative to the min/max window
             if y_range > 0:
                 rel_y = (score - y_min) / y_range
             else:
@@ -204,7 +195,6 @@ class ScoreChart(tk.Canvas):
             
             bar_height = rel_y * plot_h
             
-            # Coordinates
             x0 = self.pad_left + (i * iter_width) + spacing
             y0 = (self.height - self.pad_bottom) - bar_height
             x1 = x0 + bar_width
@@ -236,13 +226,11 @@ class MultiBarChart(tk.Canvas):
     def draw_chart(self):
         self.delete("all")
         
-        # Axis Labels
         self.create_text(15, self.height // 2, text=self.y_label, angle=90, 
                          font=("Segoe UI", 8, "bold"), fill="#555")
         self.create_text(self.width // 2, self.height - 10, text="Iteration", 
                          font=("Segoe UI", 8), fill="#555")
 
-        # Legend
         for i, label in enumerate(self.labels):
             if i >= len(self.colors): break
             offset_x = self.width - 10 - (len(self.labels) - i) * 60
@@ -269,33 +257,26 @@ class MultiBarChart(tk.Canvas):
         plot_w = self.width - (self.pad_left + self.pad_right)
         plot_h = self.height - (self.pad_y + self.pad_bottom)
 
-        # Draw Grid
         self.create_line(self.pad_left, self.pad_y + 10, self.pad_left, self.height - self.pad_bottom, fill="#ddd")
         self.create_line(self.pad_left, self.height - self.pad_bottom, self.width - self.pad_right, self.height - self.pad_bottom, fill="#ddd")
 
         self.create_text(self.pad_left - 5, self.pad_y + 10, text=f"{y_max:.2f}", anchor="e", fill="#555", font=("Segoe UI", 7))
         self.create_text(self.pad_left - 5, self.height - self.pad_bottom, text=f"{y_min:.2f}", anchor="e", fill="#555", font=("Segoe UI", 7))
         
-        # --- DRAW GROUPED BARS ---
-        # Assuming all lists have the same length (iterations)
         num_groups = len(self.data_lists[0]) if self.data_lists else 0
         if num_groups == 0: return
 
         num_series = len(self.data_lists)
         
-        # Width of one iteration group
         group_width = plot_w / num_groups
-        # Width of the block of bars inside the group (80% of space)
         block_width = group_width * 0.8
-        # Width of a single bar
         single_bar_width = block_width / num_series
-        # Spacing to center the block
         group_spacing = (group_width - block_width) / 2
 
-        for i in range(num_groups): # Iteration index
+        for i in range(num_groups): 
             group_x_start = self.pad_left + (i * group_width) + group_spacing
             
-            for j, d_list in enumerate(self.data_lists): # Series index
+            for j, d_list in enumerate(self.data_lists):
                 if j >= len(self.colors): break
                 if i >= len(d_list): continue
                 
@@ -354,17 +335,14 @@ class BenchmarkPanel(ttk.Frame):
         CHART_W = 500
         CHART_H = 220
 
-        # Score Chart
         t_score = ttk.Frame(self.tabs, style="Card.TFrame")
         self.tabs.add(t_score, text="Score")
         self.chart_score = ScoreChart(t_score, width=CHART_W, height=CHART_H, y_label="Score", is_integer=True)
         self.chart_score.pack(pady=5)
 
-        # Component Tabs
         if self.test_id == 'cpu':
             t_pi = ttk.Frame(self.tabs, style="Card.TFrame")
             self.tabs.add(t_pi, text="Pi")
-            # Changed MultiLineChart -> MultiBarChart
             self.chart_pi = MultiBarChart(t_pi, width=CHART_W, height=CHART_H, 
                                            legend_labels=["Single", "Multi"], y_label="Time (s)")
             self.chart_pi.pack(pady=5)

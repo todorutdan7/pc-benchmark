@@ -104,7 +104,7 @@ class MainWindow(tk.Tk):
         self.card_container = ttk.Frame(self.scroll_frame)
         self.card_container.pack(pady=10, fill="y")
         
-        CARD_WIDTH = 1200 
+        CARD_WIDTH = 1200
 
         sys_wrapper = ttk.Frame(self.card_container, width=CARD_WIDTH)
         sys_wrapper.pack(pady=10)
